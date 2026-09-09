@@ -9,5 +9,13 @@ export default defineConfig(
   ...configs.recommended,
   importConfigs.recommended,
   importConfigs.typescript,
-  eslintPluginPrettier
+  eslintPluginPrettier,
+  {
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
+      ]
+    }
+  }
 );
