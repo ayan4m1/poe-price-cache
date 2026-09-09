@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
-import { after, before, describe, it } from 'node:test';
+import { after, before, describe, it, mock } from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
+
+import { request as requestPrototype } from 'express';
 
 import type { AppConfig } from '../src/types.ts';
 import { startApp } from './helpers/app.ts';
@@ -123,6 +125,28 @@ describe('per-IP rate limiting', () => {
       assert.equal((await request('5.6.7.8')).status, 429);
     } finally {
       await app.close();
+    }
+  });
+
+  it('meters requests without a resolvable address under one bucket', async () => {
+    // proxy-addr leaves req.ip undefined when the socket has no remote address,
+    // which a real connection never reproduces
+    mock.getter(requestPrototype, 'ip', () => undefined);
+
+    const app = await appWith({ limit: 1, windowMs });
+
+    try {
+      assert.equal(
+        (await app.get(`${stashPath}?league=Standard&type=Map`)).status,
+        200
+      );
+      assert.equal(
+        (await app.get(`${stashPath}?league=Standard&type=Map`)).status,
+        429
+      );
+    } finally {
+      await app.close();
+      mock.restoreAll();
     }
   });
 
