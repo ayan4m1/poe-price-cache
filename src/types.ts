@@ -31,6 +31,29 @@ export const stashItemTypes = [
 
 export type StashItemType = (typeof stashItemTypes)[number];
 
+export const exchangeItemTypes = [
+  'Currency',
+  'Fragment',
+  'Runegraft',
+  'AllflameEmber',
+  'Tattoo',
+  'Omen',
+  'DjinnCoin',
+  'Ducat',
+  'EnshroudingCrystal',
+  'DivinationCard',
+  'Artifact',
+  'Oil',
+  'DeliriumOrb',
+  'Scarab',
+  'Astrolabe',
+  'Fossil',
+  'Resonator',
+  'Essence'
+] as const;
+
+export type ExchangeItemType = (typeof exchangeItemTypes)[number];
+
 export type CacheConfig = {
   expirationSec: number;
 };

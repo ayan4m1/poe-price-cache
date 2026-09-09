@@ -3,10 +3,11 @@ import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 
 import { cache, listen } from './config';
-import { stashItemTypes } from './types';
+import { exchangeItemTypes, stashItemTypes } from './types';
 import { cached, fetchNinja, limiters, UpstreamError } from './utils';
 
 const stashOverviewPath = '/economy/stash/current/item/overview';
+const exchangeOverviewPath = '/economy/exchange/current/overview';
 const leaguePattern = /^[A-Za-z0-9 ._-]{1,64}$/;
 const retryAfterSec = Math.ceil(listen.rateLimiter.windowMs / 1000);
 
@@ -47,34 +48,43 @@ app.get('/economy/leagues', async (_req: Request, res: Response) => {
   res.set('X-Cache', hit ? 'HIT' : 'MISS').json(value);
 });
 
-app.get(stashOverviewPath, async (req: Request, res: Response) => {
-  const { league, type } = req.query;
+/**
+ * Both overview routes take the same league/type pair and differ only in which
+ * types the upstream accepts, so they share one handler.
+ */
+function overview(path: string, types: readonly string[]) {
+  return async (req: Request, res: Response) => {
+    const { league, type } = req.query;
 
-  // validating both parameters keeps the cache key space bounded
-  if (typeof league !== 'string' || !leaguePattern.test(league)) {
-    res
-      .status(400)
-      .json({ error: 'league is required and must be a valid league id' });
-    return;
-  }
+    // validating both parameters keeps the cache key space bounded
+    if (typeof league !== 'string' || !leaguePattern.test(league)) {
+      res
+        .status(400)
+        .json({ error: 'league is required and must be a valid league id' });
+      return;
+    }
 
-  if (
-    typeof type !== 'string' ||
-    !(stashItemTypes as readonly string[]).includes(type)
-  ) {
-    res
-      .status(400)
-      .json({ error: `type must be one of: ${stashItemTypes.join(', ')}` });
-    return;
-  }
+    if (typeof type !== 'string' || !types.includes(type)) {
+      res
+        .status(400)
+        .json({ error: `type must be one of: ${types.join(', ')}` });
+      return;
+    }
 
-  const { value, hit } = await cached(
-    `${stashOverviewPath}?league=${league}&type=${type}`,
-    () => fetchNinja(stashOverviewPath, { league, type })
-  );
+    const { value, hit } = await cached(
+      `${path}?league=${league}&type=${type}`,
+      () => fetchNinja(path, { league, type })
+    );
 
-  res.set('X-Cache', hit ? 'HIT' : 'MISS').json(value);
-});
+    res.set('X-Cache', hit ? 'HIT' : 'MISS').json(value);
+  };
+}
+
+app.get(stashOverviewPath, overview(stashOverviewPath, stashItemTypes));
+app.get(
+  exchangeOverviewPath,
+  overview(exchangeOverviewPath, exchangeItemTypes)
+);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: 'Not found' });
