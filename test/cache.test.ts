@@ -18,7 +18,7 @@ import type { FakeUpstream } from './helpers/upstream.ts';
 const stashPath = '/economy/stash/current/item/overview';
 const exchangePath = '/economy/exchange/current/overview';
 
-describe('cache behaviour over HTTP', () => {
+describe('cache behavior over HTTP', () => {
   let upstream: FakeUpstream;
 
   before(async () => {
