@@ -4,6 +4,7 @@ import autoExternal from 'rollup-plugin-auto-external';
 
 export default {
   input: './src/index.ts',
+  external: [/^node:/],
   output: {
     dir: './lib',
     format: 'esm'
