@@ -1,0 +1,9 @@
+services:
+  bot:
+    image: poe-price-cache
+    build: ./
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - '9050:9050'

@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "esModuleInterop": true,
+    "types": ["node"],
+    "rootDir": "./",
+    "outDir": "./lib"
+  },
+  "include": ["src/**/*.ts"]
+}

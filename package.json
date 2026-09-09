@@ -1,0 +1,58 @@
+{
+  "author": "ayan4m1 <andrew@bulletlogic.com>",
+  "config": {
+    "commitizen": {
+      "path": "@commitlint/cz-commitlint"
+    }
+  },
+  "description": "HTTP poe.ninja price cache server",
+  "devDependencies": {
+    "@commitlint/config-conventional": "^20.3.0",
+    "@commitlint/cz-commitlint": "^20.3.0",
+    "@eslint/js": "^9.39.2",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "^26.5.0",
+    "@types/rollup-plugin-auto-external": "^2.0.5",
+    "commitizen": "^4.3.1",
+    "commitlint": "^20.3.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import-x": "^4.16.1",
+    "eslint-plugin-prettier": "^5.5.4",
+    "husky": "^9.1.7",
+    "inquirer": "9",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
+    "rollup": "^4.54.0",
+    "rollup-plugin-auto-external": "^2.0.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.51.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "lib/"
+  ],
+  "license": "MIT",
+  "module": "lib/index.js",
+  "name": "poe-price-cache",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ayan4m1/poe-price-cache.git"
+  },
+  "scripts": {
+    "build": "rollup -c --configPlugin typescript",
+    "develop": "rollup -c -w --configPlugin typescript",
+    "lint": "eslint ./src/**/*.ts",
+    "start": "node lib/index.js"
+  },
+  "type": "module",
+  "types": "lib/index.d.ts",
+  "version": "0.1.0",
+  "packageManager": "yarn@4.18.0"
+}
