@@ -50,8 +50,11 @@
   "scripts": {
     "build": "rollup -c --configPlugin typescript",
     "develop": "rollup -c -w --configPlugin typescript",
-    "lint": "eslint ./src/**/*.ts",
-    "start": "node lib/index.js"
+    "lint": "eslint ./src ./test",
+    "start": "node lib/index.js",
+    "test": "node --experimental-test-coverage --test \"test/**/*.test.ts\"",
+    "test:watch": "node --test --watch \"test/**/*.test.ts\"",
+    "typecheck": "tsc -p tsconfig.test.json"
   },
   "type": "module",
   "types": "lib/index.d.ts",

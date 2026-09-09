@@ -1,11 +1,15 @@
 {
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
     "declaration": true,
+    "erasableSyntaxOnly": true,
     "esModuleInterop": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "rewriteRelativeImportExtensions": true,
     "target": "ES2023",
     "types": ["node"],
+    "verbatimModuleSyntax": true,
     "rootDir": "./",
     "outDir": "./lib"
   },

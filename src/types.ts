@@ -82,3 +82,14 @@ export type CacheResult<T> = {
   value: T;
   hit: boolean;
 };
+
+export type NinjaConfig = {
+  baseUrl: string;
+  timeoutMs: number;
+};
+
+export type AppConfig = {
+  cache: CacheConfig;
+  listen: ListenConfig;
+  ninja: NinjaConfig;
+};

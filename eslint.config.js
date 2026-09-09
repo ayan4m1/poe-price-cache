@@ -5,6 +5,7 @@ import { flatConfigs as importConfigs } from 'eslint-plugin-import-x';
 import eslintPluginPrettier from 'eslint-plugin-prettier/recommended';
 
 export default defineConfig(
+  { ignores: ['lib/'] },
   eslint.configs.recommended,
   ...configs.recommended,
   importConfigs.recommended,
