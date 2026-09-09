@@ -19,7 +19,7 @@ app.set('trust proxy', listen.trustProxy);
 app.use(cors({ origin: listen.corsDomain }));
 
 // registered before the limiter so health checks are never throttled
-app.get('/health', (_req: Request, res: Response) => {
+app.get('/health', (_: Request, res: Response) => {
   res.json({ status: 'ok' });
 });
 
@@ -41,7 +41,7 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-app.get('/economy/leagues', async (_req: Request, res: Response) => {
+app.get('/economy/leagues', async (_: Request, res: Response) => {
   const { value, hit } = await cached('/economy/leagues', () =>
     fetchNinja('/economy/leagues')
   );
@@ -88,11 +88,11 @@ app.get(
   overview(exchangeOverviewPath, exchangeItemTypes)
 );
 
-app.use((_req: Request, res: Response) => {
+app.use((_: Request, res: Response) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
+app.use((error: Error, _: Request, res: Response) => {
   if (error instanceof UpstreamError) {
     res.status(502).json({ error: error.message });
   } else {
