@@ -54,6 +54,10 @@ export const exchangeItemTypes = [
 
 export type ExchangeItemType = (typeof exchangeItemTypes)[number];
 
+export const stashCurrencyTypes = ['Currency', 'Fragment'] as const;
+
+export type StashCurrencyType = (typeof stashCurrencyTypes)[number];
+
 export type CacheConfig = {
   expirationSec: number;
 };

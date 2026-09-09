@@ -3,11 +3,12 @@ import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 
 import { cache, listen } from './config';
-import { exchangeItemTypes, stashItemTypes } from './types';
+import { exchangeItemTypes, stashCurrencyTypes, stashItemTypes } from './types';
 import { cached, fetchNinja, limiters, UpstreamError } from './utils';
 
 const stashOverviewPath = '/economy/stash/current/item/overview';
 const exchangeOverviewPath = '/economy/exchange/current/overview';
+const stashCurrencyPath = '/economy/stash/current/currency/overview';
 const leaguePattern = /^[A-Za-z0-9 ._-]{1,64}$/;
 const retryAfterSec = Math.ceil(listen.rateLimiter.windowMs / 1000);
 
@@ -81,6 +82,7 @@ function overview(path: string, types: readonly string[]) {
 }
 
 app.get(stashOverviewPath, overview(stashOverviewPath, stashItemTypes));
+app.get(stashCurrencyPath, overview(stashCurrencyPath, stashCurrencyTypes));
 app.get(
   exchangeOverviewPath,
   overview(exchangeOverviewPath, exchangeItemTypes)
