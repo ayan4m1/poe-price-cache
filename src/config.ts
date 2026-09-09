@@ -1,6 +1,11 @@
 import { CacheConfig, ListenConfig } from './types';
 
-process.loadEnvFile();
+try {
+  process.loadEnvFile();
+} catch {
+  // no .env on disk - fall back to the ambient environment, which is how
+  // docker compose supplies configuration via env_file
+}
 
 export const cache: CacheConfig = {
   expirationSec: parseInt(process.env.POE_CACHE_EXPIRATION_SEC || '900', 10)
