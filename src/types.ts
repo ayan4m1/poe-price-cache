@@ -1,3 +1,36 @@
+export const stashItemTypes = [
+  'Wombgift',
+  'Corpse',
+  'Incubator',
+  'UniqueWeapon',
+  'UniqueArmour',
+  'UniqueAccessory',
+  'UniqueFlask',
+  'UniqueJewel',
+  'ForbiddenJewel',
+  'ShrineBelt',
+  'UniqueTincture',
+  'UniqueRelic',
+  'SkillGem',
+  'ImbuedGem',
+  'ClusterJewel',
+  'Map',
+  'BlightedMap',
+  'BlightRavagedMap',
+  'UniqueMap',
+  'ValdoMap',
+  'Invitation',
+  'Memory',
+  'IncursionTemple',
+  'ScryingOrb',
+  'BaseType',
+  'Flask',
+  'Beast',
+  'Vial'
+] as const;
+
+export type StashItemType = (typeof stashItemTypes)[number];
+
 export type CacheConfig = {
   expirationSec: number;
 };
@@ -6,8 +39,19 @@ export type ListenConfig = {
   host: string;
   port: number;
   corsDomain: string;
+  trustProxy: boolean;
   rateLimiter: {
     windowMs: number;
     limit: number;
   };
+};
+
+export type CacheEntry<T> = {
+  value: T;
+  expiresAt: number;
+};
+
+export type CacheResult<T> = {
+  value: T;
+  hit: boolean;
 };

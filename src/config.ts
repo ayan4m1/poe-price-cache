@@ -15,6 +15,7 @@ export const listen: ListenConfig = {
   host: process.env.POE_WEB_HOST || '0.0.0.0',
   port: parseInt(process.env.POE_WEB_PORT || '9050', 10),
   corsDomain: process.env.POE_WEB_CORS_DOMAIN || '*',
+  trustProxy: process.env.POE_WEB_TRUST_PROXY === 'true',
   rateLimiter: {
     windowMs: parseInt(process.env.POE_WEB_LIMITER_WINDOW_MS || '5000', 10),
     limit: parseInt(process.env.POE_WEB_LIMITER_LIMIT || '1', 10)
