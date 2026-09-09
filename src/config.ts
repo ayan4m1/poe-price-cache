@@ -13,7 +13,7 @@ export const cache: CacheConfig = {
 
 export const listen: ListenConfig = {
   host: process.env.POE_WEB_HOST || '0.0.0.0',
-  port: parseInt(process.env.POE_WEB_PORT || '9011', 10),
+  port: parseInt(process.env.POE_WEB_PORT || '9050', 10),
   corsDomain: process.env.POE_WEB_CORS_DOMAIN || '*',
   rateLimiter: {
     windowMs: parseInt(process.env.POE_WEB_LIMITER_WINDOW_MS || '5000', 10),
