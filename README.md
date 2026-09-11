@@ -1,5 +1,7 @@
 # PoE Price Cache
 
+[![codecov](https://codecov.io/gh/ayan4m1/poe-price-cache/graph/badge.svg?token=daFDsOfdPb)](https://codecov.io/gh/ayan4m1/poe-price-cache)
+
 The [poe.ninja](https://poe.ninja/docs/api) docs tell you to run your own cache server if you are writing an app integration.
 
 This is the simplest form of that cache server - in-memory, simple rate limiting, no frills.
