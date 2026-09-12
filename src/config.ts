@@ -23,7 +23,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       host: env.POE_WEB_HOST || '0.0.0.0',
       port: parseInt(env.POE_WEB_PORT || '9050', 10),
       corsDomain: env.POE_WEB_CORS_DOMAIN || '*',
-      trustProxy: env.POE_WEB_TRUST_PROXY === 'true',
+      trustProxy: env.POE_WEB_TRUST_PROXY?.toLowerCase() === 'true',
       rateLimiter: {
         windowMs: parseInt(env.POE_WEB_LIMITER_WINDOW_MS || '5000', 10),
         limit: parseInt(env.POE_WEB_LIMITER_LIMIT || '1', 10)

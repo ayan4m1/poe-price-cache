@@ -152,13 +152,18 @@ describe('loadConfig', () => {
     });
   });
 
-  it('only trusts the proxy for the exact string "true"', () => {
-    for (const POE_WEB_TRUST_PROXY of ['false', '1', 'TRUE', '']) {
+  it('only trusts the proxy for the string "true"', () => {
+    for (const POE_WEB_TRUST_PROXY of ['false', '1', 'ture', '']) {
       assert.equal(
         loadConfig({ POE_WEB_TRUST_PROXY }).listen.trustProxy,
         false,
         `expected "${POE_WEB_TRUST_PROXY}" not to enable trust proxy`
       );
     }
+    assert.equal(
+      loadConfig({ POE_WEB_TRUST_PROXY: 'True' }).listen.trustProxy,
+      true,
+      'expected "True" to enable trust proxy'
+    );
   });
 });
