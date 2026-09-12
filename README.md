@@ -24,12 +24,24 @@ If you don't have Docker:
 
 ## Configuration
 
-Everything is set through the environment (see `.env.default`). Beyond the listen/limiter/cache settings, two variables control the upstream:
+Configuration is done by `.env` file and/or environment variables (see `.env.default`).
+
+Two variables control access to the upstream poe.ninja API:
 
 - `POE_NINJA_BASE_URL` - the poe.ninja API root, default `https://poe.ninja/poe1/api`
 - `POE_NINJA_TIMEOUT_MS` - how long to wait for a poe.ninja response, default `10000`
 
 `POE_CACHE_EXPIRATION_SEC` must be a positive integer for caching to work correctly.
+
+If you are hosting behind a proxy like nginx, set:
+
+```sh
+POE_WEB_TRUST_PROXY=true
+```
+
+This allows the rate limiting to work correctly based on the IP address given to us by the proxy server in `X-Forwarded-For`.
+
+**WARNING:** make sure that the `POE_WEB_TRUST_PROXY` is `false` unless you are using a proxy, since this will allow an attacker to impersonate any IP address ahd bypass rate limiting.
 
 ## Testing
 
