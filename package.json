@@ -5,6 +5,11 @@
       "path": "@commitlint/cz-commitlint"
     }
   },
+  "dependencies": {
+    "bottleneck": "^2.19.5",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  },
   "description": "HTTP poe.ninja price cache server",
   "devDependencies": {
     "@commitlint/config-conventional": "^20.3.0",
@@ -43,6 +48,7 @@
   "license": "MIT",
   "module": "lib/index.js",
   "name": "poe-price-cache",
+  "packageManager": "yarn@4.18.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ayan4m1/poe-price-cache.git"
@@ -58,11 +64,5 @@
   },
   "type": "module",
   "types": "lib/index.d.ts",
-  "version": "0.1.0",
-  "packageManager": "yarn@4.18.0",
-  "dependencies": {
-    "bottleneck": "^2.19.5",
-    "cors": "^2.8.6",
-    "express": "^5.2.1"
-  }
+  "version": "0.1.0"
 }
