@@ -97,7 +97,8 @@ describe('per-IP rate limiting', () => {
         429
       );
 
-      await delay(windowMs + 100);
+      // delay by twice the window to ensure it has elapsed
+      await delay(windowMs * 2);
 
       assert.equal(
         (await app.get(`${stashPath}?league=Standard&type=Map`)).status,
