@@ -54,8 +54,10 @@ describe('per-IP rate limiting', () => {
 
       assert.equal(third.status, 429);
       assert.deepEqual(third.body, { error: 'Too many requests' });
-      // ceil(windowMs / 1000)
-      assert.equal(third.headers.get('retry-after'), '1');
+      assert.equal(
+        third.headers.get('retry-after'),
+        Math.ceil(windowMs / 1000).toString()
+      );
     } finally {
       await app.close();
     }

@@ -90,9 +90,8 @@ for (const { name, path, types, foreignType } of routes) {
     });
 
     it('forwards the league and type to the upstream path', async () => {
-      const res = await app.get(
-        `${path}?league=Mercenaries HC&type=${types[0]}`
-      );
+      const league = 'Mercenaries HC';
+      const res = await app.get(`${path}?league=${league}&type=${types[0]}`);
 
       assert.equal(res.status, 200);
       assert.equal(upstream.count, 1);
@@ -100,7 +99,7 @@ for (const { name, path, types, foreignType } of routes) {
       const request = upstream.requests[0];
 
       assert.equal(request.path, `/poe1/api${path}`);
-      assert.equal(request.query.get('league'), 'Mercenaries HC');
+      assert.equal(request.query.get('league'), league);
       assert.equal(request.query.get('type'), types[0]);
     });
 
