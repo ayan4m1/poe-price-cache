@@ -63,6 +63,6 @@
     "typecheck": "tsc -p tsconfig.test.json"
   },
   "type": "module",
-  "types": "lib/index.d.ts",
+  "types": "lib/src/index.d.ts",
   "version": "0.1.0"
 }
