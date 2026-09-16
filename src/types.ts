@@ -67,7 +67,7 @@ export type ListenConfig = {
   host: string;
   port: number;
   corsDomain: string;
-  trustProxy: boolean;
+  trustProxy: boolean | number;
   rateLimiter: {
     windowMs: number;
     limit: number;

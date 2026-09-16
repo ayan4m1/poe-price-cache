@@ -143,7 +143,7 @@ describe('loadConfig', () => {
         host: '127.0.0.1',
         port: 8080,
         corsDomain: 'https://example.com',
-        trustProxy: true,
+        trustProxy: 1,
         rateLimiter: {
           windowMs: 2500,
           limit: 10
@@ -166,7 +166,7 @@ describe('loadConfig', () => {
     }
     assert.equal(
       loadConfig({ POE_WEB_TRUST_PROXY: 'True' }).listen.trustProxy,
-      true,
+      1,
       'expected "True" to enable trust proxy'
     );
   });
