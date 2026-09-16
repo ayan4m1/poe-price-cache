@@ -30,14 +30,21 @@ export const defaultCacheMaxEntries = 1000;
  * Raised when poe.ninja cannot be reached or answers with a non-2xx status, so
  * that the Express error handler can reply with that status instead of a
  * generic 500. Transport failures carry a 502.
+ *
+ * `message` carries the diagnostic detail - the resolved upstream path and the
+ * transport failure - and belongs in the server log only. `publicMessage` is
+ * the sanitized form a client is allowed to see, so that the configured
+ * upstream layout never leaks to a caller.
  */
 export class UpstreamError extends Error {
   public readonly status: number;
+  public readonly publicMessage: string;
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, publicMessage: string) {
     super(message);
     this.name = 'UpstreamError';
     this.status = status;
+    this.publicMessage = publicMessage;
   }
 }
 
@@ -49,15 +56,27 @@ export type Cache = {
 };
 
 /**
- * In-memory cache with a fixed TTL. Concurrent misses for the same key share a
- * single `fetcher` call.
+ * In-memory cache with a fixed TTL and a bounded entry count. Concurrent misses
+ * for the same key share a single `fetcher` call.
  *
  * A non-numeric POE_CACHE_EXPIRATION_SEC parses to NaN, which would make every
  * entry expire immediately and schedule the sweeper at the 1ms floor, so a TTL
  * that is not a positive number disables caching outright.
+ *
+ * `maxEntries` bounds the key space. Route validation constrains the shape of a
+ * league id but not how many distinct ones exist, so without this bound a
+ * caller can mint unlimited keys and grow the store until the process runs out
+ * of memory - the sweeper only drops entries that have already expired. Once
+ * the store is full the least recently used entry is evicted. A bound that is
+ * not a positive number falls back to the default rather than leaving the
+ * store unbounded.
  */
-export function createCache(expirationSec: number): Cache {
+export function createCache(
+  expirationSec: number,
+  maxEntries: number = defaultCacheMaxEntries
+): Cache {
   const enabled = Number.isFinite(expirationSec) && expirationSec > 0;
+  const bounded = Number.isFinite(maxEntries) && maxEntries >= 1;
 
   if (!enabled) {
     console.warn(
@@ -65,10 +84,19 @@ export function createCache(expirationSec: number): Cache {
     );
   }
 
+  if (!bounded) {
+    console.warn(
+      `cache max entries "${maxEntries}" is not a positive number - falling back to ${defaultCacheMaxEntries}`
+    );
+  }
+
+  const limit = bounded ? Math.floor(maxEntries) : defaultCacheMaxEntries;
+
   const store = new Map<string, CacheEntry<unknown>>();
   const inFlight = new Map<string, Promise<unknown>>();
 
-  // drop expired entries so the cache does not grow without bound
+  // drop expired entries so that stale keys do not sit on a slot until the
+  // eviction below reclaims it
   const sweeper = enabled
     ? setInterval(() => {
         const now = Date.now();
@@ -89,6 +117,10 @@ export function createCache(expirationSec: number): Cache {
       const entry = store.get(key);
 
       if (entry && entry.expiresAt > Date.now()) {
+        // reinsert so that the most recently read key is the last evicted
+        store.delete(key);
+        store.set(key, entry);
+
         return { value: entry.value as T, hit: true };
       }
 
@@ -100,6 +132,20 @@ export function createCache(expirationSec: number): Cache {
             // with caching disabled we still coalesce concurrent misses, we
             // just never retain the result
             if (enabled) {
+              // an expired entry for this key still occupies its original slot,
+              // so drop it first and let the write below append a fresh one
+              store.delete(key);
+
+              while (store.size >= limit) {
+                const oldest = store.keys().next();
+
+                if (oldest.done) {
+                  break;
+                }
+
+                store.delete(oldest.value);
+              }
+
               store.set(key, {
                 value,
                 expiresAt: Date.now() + expirationSec * 1000
@@ -181,14 +227,16 @@ export function createNinjaClient(config: NinjaConfig): NinjaClient {
         // DNS failures, connection resets and the abort timeout all land here
         throw new UpstreamError(
           `could not reach poe.ninja: ${error instanceof Error ? error.message : String(error)}`,
-          502
+          502,
+          'could not reach poe.ninja'
         );
       }
 
       if (!response.ok) {
         throw new UpstreamError(
           `poe.ninja responded ${response.status} for ${url.pathname}${url.search}`,
-          response.status
+          response.status,
+          `poe.ninja responded ${response.status}`
         );
       }
 
