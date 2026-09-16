@@ -137,7 +137,9 @@ export function createApp(config: AppConfig = loadConfig()): Express {
     }
 
     if (error instanceof UpstreamError) {
-      res.status(error.status).json({ error: error.message });
+      // the resolved upstream path stays in the log, never in the response
+      console.error(error);
+      res.status(error.status).json({ error: error.publicMessage });
     } else {
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
