@@ -32,7 +32,7 @@ const leaguePattern = /^[A-Za-z0-9 ._-]{1,32}$/;
 export function createApp(config: AppConfig = loadConfig()): Express {
   const { cache: cacheConfig, listen, ninja } = config;
   const retryAfterSec = Math.ceil(listen.rateLimiter.windowMs / 1000);
-  const cache = createCache(cacheConfig.expirationSec);
+  const cache = createCache(cacheConfig.expirationSec, cacheConfig.maxEntries);
   const limiters = createLimiters(listen.rateLimiter);
   const client = createNinjaClient(ninja);
 

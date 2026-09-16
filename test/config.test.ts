@@ -6,6 +6,7 @@ import { loadConfig } from '../src/config.ts';
 
 const managedKeys = [
   'POE_CACHE_EXPIRATION_SEC',
+  'POE_CACHE_MAX_ENTRIES',
   'POE_WEB_HOST',
   'POE_WEB_PORT',
   'POE_WEB_CORS_DOMAIN',
@@ -18,7 +19,8 @@ const managedKeys = [
 
 const defaults = {
   cache: {
-    expirationSec: 900
+    expirationSec: 900,
+    maxEntries: 1000
   },
   listen: {
     host: '0.0.0.0',
@@ -121,6 +123,7 @@ describe('loadConfig', () => {
   it('reads every setting from the supplied environment', () => {
     const config = loadConfig({
       POE_CACHE_EXPIRATION_SEC: '60',
+      POE_CACHE_MAX_ENTRIES: '25',
       POE_WEB_HOST: '127.0.0.1',
       POE_WEB_PORT: '8080',
       POE_WEB_CORS_DOMAIN: 'https://example.com',
@@ -133,7 +136,8 @@ describe('loadConfig', () => {
 
     assert.deepEqual(config, {
       cache: {
-        expirationSec: 60
+        expirationSec: 60,
+        maxEntries: 25
       },
       listen: {
         host: '127.0.0.1',

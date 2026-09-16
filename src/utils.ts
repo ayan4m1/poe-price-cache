@@ -23,6 +23,9 @@ function packageVersion(): string {
 
 const userAgent = `poe-price-cache/${packageVersion()} (+https://github.com/ayan4m1/poe-price-cache)`;
 
+/** Fallback bound on cached entries, shared by `loadConfig` and `createCache`. */
+export const defaultCacheMaxEntries = 1000;
+
 /**
  * Raised when poe.ninja cannot be reached or answers with a non-2xx status, so
  * that the Express error handler can reply with that status instead of a

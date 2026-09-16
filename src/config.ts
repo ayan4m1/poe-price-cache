@@ -1,4 +1,5 @@
-import type { AppConfig } from './types.ts';
+import { defaultCacheMaxEntries } from './utils';
+import type { AppConfig } from './types';
 
 /**
  * Reads configuration from `env`, defaulting to the process environment. This
@@ -17,7 +18,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
 
   return {
     cache: {
-      expirationSec: parseInt(env.POE_CACHE_EXPIRATION_SEC || '900', 10)
+      expirationSec: parseInt(env.POE_CACHE_EXPIRATION_SEC || '900', 10),
+      maxEntries: parseInt(
+        env.POE_CACHE_MAX_ENTRIES || String(defaultCacheMaxEntries),
+        10
+      )
     },
     listen: {
       host: env.POE_WEB_HOST || '0.0.0.0',

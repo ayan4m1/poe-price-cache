@@ -33,6 +33,12 @@ Two variables control access to the upstream poe.ninja API:
 
 `POE_CACHE_EXPIRATION_SEC` must be a positive integer for caching to work correctly.
 
+`POE_CACHE_MAX_ENTRIES` caps how many responses are held at once, defaulting to `1000`. The
+cache is keyed on league and type, and a league is only checked for shape, so without this cap
+a caller can mint keys faster than they expire and grow the process until it runs out of
+memory. When the cache is full the least recently used entry is dropped. Raise it if you serve
+many leagues; a value that is not a positive integer falls back to the default.
+
 If you are hosting behind a proxy like nginx, set:
 
 ```sh

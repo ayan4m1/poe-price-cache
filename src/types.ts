@@ -60,6 +60,7 @@ export type StashCurrencyType = (typeof stashCurrencyTypes)[number];
 
 export type CacheConfig = {
   expirationSec: number;
+  maxEntries: number;
 };
 
 export type ListenConfig = {

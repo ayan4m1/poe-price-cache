@@ -34,6 +34,7 @@ function buildConfig(overrides: ConfigOverrides): AppConfig {
   return {
     cache: {
       expirationSec: 900,
+      maxEntries: 1000,
       ...overrides.cache
     },
     listen: {
