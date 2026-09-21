@@ -4,11 +4,11 @@ import { setTimeout as delay } from 'node:timers/promises';
 
 import { request as requestPrototype } from 'express';
 
-import type { AppConfig } from '../src/types.ts';
 import { startApp } from './helpers/app.ts';
 import type { TestApp } from './helpers/app.ts';
 import { startUpstream } from './helpers/upstream.ts';
 import type { FakeUpstream } from './helpers/upstream.ts';
+import type { RateLimitConfig } from '../src/types.ts';
 
 const stashPath = '/economy/stash/current/item/overview';
 const windowMs = 1000;
@@ -30,7 +30,7 @@ describe('per-IP rate limiting', () => {
    * routes, so a throttled request never reaches one.
    */
   async function appWith(
-    rateLimiter: Partial<AppConfig['listen']['rateLimiter']>
+    rateLimiter: Partial<RateLimitConfig>
   ): Promise<TestApp> {
     return startApp({
       listen: { rateLimiter },

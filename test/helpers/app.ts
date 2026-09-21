@@ -2,14 +2,20 @@ import { once } from 'node:events';
 import type { Server } from 'node:http';
 
 import { createApp } from '../../src/app.ts';
-import type { AppConfig } from '../../src/types.ts';
+import type {
+  AppConfig,
+  CacheConfig,
+  ListenConfig,
+  NinjaConfig,
+  RateLimitConfig
+} from '../../src/types.ts';
 
 export type ConfigOverrides = {
-  cache?: Partial<AppConfig['cache']>;
-  listen?: Partial<Omit<AppConfig['listen'], 'rateLimiter'>> & {
-    rateLimiter?: Partial<AppConfig['listen']['rateLimiter']>;
+  cache?: Partial<CacheConfig>;
+  listen?: Partial<Omit<ListenConfig, 'rateLimiter'>> & {
+    rateLimiter?: Partial<RateLimitConfig>;
   };
-  ninja?: Partial<AppConfig['ninja']>;
+  ninja?: Partial<NinjaConfig>;
 };
 
 export type TestResponse = {

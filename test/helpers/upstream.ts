@@ -23,7 +23,7 @@ export type UpstreamResponse = {
 };
 
 export type FakeUpstream = {
-  /** Value for `AppConfig['ninja'].baseUrl`. */
+  /** Value for `NinjaConfig.baseUrl`. */
   baseUrl: string;
   /** Every request the app has made, in order. */
   requests: UpstreamRequest[];

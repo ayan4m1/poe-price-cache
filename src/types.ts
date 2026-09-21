@@ -68,10 +68,12 @@ export type ListenConfig = {
   port: number;
   corsDomain: string;
   trustProxy: boolean | number;
-  rateLimiter: {
-    windowMs: number;
-    limit: number;
-  };
+  rateLimiter: RateLimitConfig;
+};
+
+export type RateLimitConfig = {
+  windowMs: number;
+  limit: number;
 };
 
 export type CacheEntry<T> = {
