@@ -1,5 +1,5 @@
-import { defaultCacheMaxEntries } from './utils';
-import type { AppConfig } from './types';
+import { defaultCacheMaxEntries } from './utils.ts';
+import type { AppConfig } from './types.ts';
 
 /**
  * Reads configuration from `env`, defaulting to the process environment. This

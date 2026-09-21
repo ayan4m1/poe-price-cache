@@ -1,12 +1,11 @@
 import assert from 'node:assert/strict';
 import { after, before, describe, it, mock } from 'node:test';
 
-import { defaultCacheMaxEntries } from '../src/types.ts';
-import { createCache } from '../src/utils.ts';
 import { startApp } from './helpers/app.ts';
 import type { TestApp } from './helpers/app.ts';
 import { startUpstream } from './helpers/upstream.ts';
 import type { FakeUpstream } from './helpers/upstream.ts';
+import { defaultCacheMaxEntries, createCache } from '../src/utils.ts';
 
 const stashPath = '/economy/stash/current/item/overview';
 
