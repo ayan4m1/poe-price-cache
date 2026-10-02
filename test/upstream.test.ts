@@ -1,23 +1,32 @@
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, describe, it, mock } from 'node:test';
-import type { Mock } from 'node:test';
 
-import { startApp } from './helpers/app.ts';
 import type { ConfigOverrides, TestApp } from './helpers/app.ts';
 import { startUpstream } from './helpers/upstream.ts';
 import type { FakeUpstream } from './helpers/upstream.ts';
+
+// every upstream failure is logged, so capture it rather than letting the
+// detail spill into the test output - several cases assert on it directly
+const errors = mock.fn<(error: unknown) => void>();
+
+// app.ts takes its logger when it is first loaded, so the mock has to be in
+// place before the helper pulls app.ts in
+mock.module('../src/logging.ts', {
+  namedExports: {
+    getLogger: () => ({ error: errors, warn: () => {}, info: () => {} })
+  }
+});
+
+const { startApp } = await import('./helpers/app.ts');
 
 const path = '/economy/stash/current/item/overview?league=Standard&type=Map';
 
 describe('upstream failures', () => {
   let upstream: FakeUpstream;
   let app: TestApp;
-  let errors: Mock<typeof console.error>;
 
   beforeEach(async () => {
-    // every upstream failure is logged, so capture it rather than letting the
-    // detail spill into the test output - several cases assert on it directly
-    errors = mock.method(console, 'error', () => {});
+    errors.mock.resetCalls();
     upstream = await startUpstream();
     // a fresh pair per test, so no successful response is ever cached across
     // the error cases
@@ -27,7 +36,6 @@ describe('upstream failures', () => {
   afterEach(async () => {
     await app.close();
     await upstream.close();
-    mock.restoreAll();
   });
 
   async function withConfig(overrides: ConfigOverrides) {

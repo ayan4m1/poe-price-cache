@@ -1,21 +1,29 @@
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, describe, it, mock } from 'node:test';
-import type { Mock } from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
 
-import { loadConfig } from '../src/config.ts';
-import { createCache } from '../src/utils.ts';
-import { startApp } from './helpers/app.ts';
 import { startUpstream } from './helpers/upstream.ts';
+
+// every construction warns; keep the run quiet and assert on the calls
+const warn = mock.fn<(message: string) => void>();
+
+// utils.ts takes its logger when it is first loaded, so the mock has to be in
+// place before anything pulls utils.ts in
+mock.module('../src/logging.ts', {
+  namedExports: {
+    getLogger: () => ({ error: () => {}, warn, info: () => {} })
+  }
+});
+
+const { loadConfig } = await import('../src/config.ts');
+const { createCache } = await import('../src/utils.ts');
+const { startApp } = await import('./helpers/app.ts');
 
 const stashPath = '/economy/stash/current/item/overview';
 
 describe('an unusable cache expiration disables caching', () => {
-  let warn: Mock<typeof console.warn>;
-
   beforeEach(() => {
-    // every construction warns; keep the run quiet and assert on the calls
-    warn = mock.method(console, 'warn', () => {});
+    warn.mock.resetCalls();
   });
 
   afterEach(() => {

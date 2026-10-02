@@ -91,8 +91,13 @@ export type NinjaConfig = {
   timeoutMs: number;
 };
 
+export type LogConfig = {
+  level: string;
+};
+
 export type AppConfig = {
   cache: CacheConfig;
+  log: LogConfig;
   listen: ListenConfig;
   ninja: NinjaConfig;
 };

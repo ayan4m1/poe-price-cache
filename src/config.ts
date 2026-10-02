@@ -24,6 +24,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
         10
       )
     },
+    log: {
+      level: env.POE_LOG_LEVEL || 'info'
+    },
     listen: {
       host: env.POE_WEB_HOST || '0.0.0.0',
       port: parseInt(env.POE_WEB_PORT || '9050', 10),

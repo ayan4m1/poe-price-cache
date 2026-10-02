@@ -1,11 +1,22 @@
 import assert from 'node:assert/strict';
 import { after, before, describe, it, mock } from 'node:test';
 
-import { startApp } from './helpers/app.ts';
 import type { TestApp } from './helpers/app.ts';
 import { startUpstream } from './helpers/upstream.ts';
 import type { FakeUpstream } from './helpers/upstream.ts';
-import { defaultCacheMaxEntries, createCache } from '../src/utils.ts';
+
+const warn = mock.fn<(message: string) => void>();
+
+// utils.ts takes its logger when it is first loaded, so the mock has to be in
+// place before anything pulls utils.ts in
+mock.module('../src/logging.ts', {
+  namedExports: {
+    getLogger: () => ({ error: () => {}, warn, info: () => {} })
+  }
+});
+
+const { startApp } = await import('./helpers/app.ts');
+const { defaultCacheMaxEntries, createCache } = await import('../src/utils.ts');
 
 const stashPath = '/economy/stash/current/item/overview';
 
@@ -113,7 +124,7 @@ describe('cache entry bound', () => {
     });
 
     it('falls back to the default bound when the bound is unusable', async () => {
-      const warn = mock.method(console, 'warn', () => {});
+      warn.mock.resetCalls();
       const cache = createCache(900, NaN);
       const calls: string[] = [];
 
@@ -132,7 +143,6 @@ describe('cache entry bound', () => {
         );
       } finally {
         cache.close();
-        mock.restoreAll();
       }
     });
   });

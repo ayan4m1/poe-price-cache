@@ -6,12 +6,14 @@ import type {
   AppConfig,
   CacheConfig,
   ListenConfig,
+  LogConfig,
   NinjaConfig,
   RateLimitConfig
 } from '../../src/types.ts';
 
 export type ConfigOverrides = {
   cache?: Partial<CacheConfig>;
+  log?: Partial<LogConfig>;
   listen?: Partial<Omit<ListenConfig, 'rateLimiter'>> & {
     rateLimiter?: Partial<RateLimitConfig>;
   };
@@ -42,6 +44,10 @@ function buildConfig(overrides: ConfigOverrides): AppConfig {
       expirationSec: 900,
       maxEntries: 1000,
       ...overrides.cache
+    },
+    log: {
+      level: 'info',
+      ...overrides.log
     },
     listen: {
       host: '127.0.0.1',

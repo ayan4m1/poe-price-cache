@@ -16,7 +16,9 @@ import {
   createNinjaClient,
   UpstreamError
 } from './utils.ts';
+import { getLogger } from './logging.ts';
 
+const log = getLogger('app');
 const stashOverviewPath = '/economy/stash/current/item/overview';
 const exchangeOverviewPath = '/economy/exchange/current/overview';
 const stashCurrencyPath = '/economy/stash/current/currency/overview';
@@ -138,10 +140,10 @@ export function createApp(config: AppConfig = loadConfig()): Express {
 
     if (error instanceof UpstreamError) {
       // the resolved upstream path stays in the log, never in the response
-      console.error(error);
+      log.error(error);
       res.status(error.status).json({ error: error.publicMessage });
     } else {
-      console.error(error);
+      log.error(error);
       res.status(500).json({ error: 'Internal server error' });
     }
   });

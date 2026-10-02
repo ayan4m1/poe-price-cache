@@ -8,7 +8,8 @@
   "dependencies": {
     "bottleneck": "^2.19.5",
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "winston": "^3.19.0"
   },
   "description": "HTTP poe.ninja price cache server",
   "devDependencies": {
@@ -58,8 +59,8 @@
     "develop": "rollup -c -w --configPlugin typescript",
     "lint": "eslint ./src ./test",
     "start": "node lib/index.js",
-    "test": "node --experimental-test-coverage --test-reporter=spec --test-reporter=lcov --test-reporter-destination=stdout --test-reporter-destination=coverage.xml --test \"test/**/*.test.ts\"",
-    "test:watch": "node --test --watch \"test/**/*.test.ts\"",
+    "test": "node --experimental-test-module-mocks --experimental-test-coverage --test-reporter=spec --test-reporter=lcov --test-reporter-destination=stdout --test-reporter-destination=coverage.xml --test \"test/**/*.test.ts\"",
+    "test:watch": "node --experimental-test-module-mocks --test --watch \"test/**/*.test.ts\"",
     "typecheck": "tsc -p tsconfig.test.json"
   },
   "type": "module",

@@ -7,6 +7,7 @@ import type {
   ListenConfig,
   NinjaConfig
 } from './types.ts';
+import { getLogger } from './logging.ts';
 
 function packageVersion(): string {
   try {
@@ -21,6 +22,7 @@ function packageVersion(): string {
   }
 }
 
+const log = getLogger('utils');
 const userAgent = `poe-price-cache/${packageVersion()} (+https://github.com/ayan4m1/poe-price-cache)`;
 
 /** Fallback bound on cached entries, shared by `loadConfig` and `createCache`. */
@@ -79,13 +81,13 @@ export function createCache(
   const bounded = Number.isFinite(maxEntries) && maxEntries >= 1;
 
   if (!enabled) {
-    console.warn(
+    log.warn(
       `cache expiration "${expirationSec}" is not a positive number - caching is disabled`
     );
   }
 
   if (!bounded) {
-    console.warn(
+    log.warn(
       `cache max entries "${maxEntries}" is not a positive number - falling back to ${defaultCacheMaxEntries}`
     );
   }

@@ -22,6 +22,9 @@ const defaults = {
     expirationSec: 900,
     maxEntries: 1000
   },
+  log: {
+    level: 'info'
+  },
   listen: {
     host: '0.0.0.0',
     port: 9050,
@@ -138,6 +141,9 @@ describe('loadConfig', () => {
       cache: {
         expirationSec: 60,
         maxEntries: 25
+      },
+      log: {
+        level: 'info'
       },
       listen: {
         host: '127.0.0.1',
