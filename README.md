@@ -16,7 +16,7 @@ Now edit `.env` and set everything up for your environment. Then run:
 >
 > docker compose up -d
 
-If you don't have Docker:
+If you don't have Docker (requires Node 22.18 or newer):
 
 > npm run build
 >
