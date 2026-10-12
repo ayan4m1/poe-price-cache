@@ -17,5 +17,5 @@ jobs:
       - run: yarn run test
       - uses: codecov/codecov-action@v7
         with:
-          files: ./coverage.xml
+          files: ./coverage.lcov
           use_oidc: true
