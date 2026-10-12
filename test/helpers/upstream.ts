@@ -27,7 +27,7 @@ export type FakeUpstream = {
   baseUrl: string;
   /** Every request the app has made, in order. */
   requests: UpstreamRequest[];
-  /** Number of requests received - the cache assertions all read this. */
+  /** Number of requests received. */
   readonly count: number;
   /** Sets the default answer for every subsequent request. */
   respondWith(response: UpstreamResponse): void;

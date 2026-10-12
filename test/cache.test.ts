@@ -10,13 +10,14 @@ import {
 } from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
 
-import { createCache } from '../src/utils.ts';
+import {
+  createCache,
+  exchangeOverviewPath,
+  stashOverviewPath
+} from '../src/utils.ts';
 import { startApp } from './helpers/app.ts';
 import { startUpstream } from './helpers/upstream.ts';
 import type { FakeUpstream } from './helpers/upstream.ts';
-
-const stashPath = '/economy/stash/current/item/overview';
-const exchangePath = '/economy/exchange/current/overview';
 
 describe('cache behavior over HTTP', () => {
   let upstream: FakeUpstream;
@@ -34,26 +35,6 @@ describe('cache behavior over HTTP', () => {
     upstream.respondWith({ status: 200, body: [{ ok: true }] });
   });
 
-  it('serves a repeat request from the cache', async () => {
-    const app = await startApp({ ninja: { baseUrl: upstream.baseUrl } });
-
-    try {
-      const first = await app.get(`${stashPath}?league=Standard&type=Map`);
-
-      assert.equal(first.status, 200);
-      assert.equal(first.headers.get('x-cache'), 'MISS');
-      assert.equal(upstream.count, 1);
-
-      const second = await app.get(`${stashPath}?league=Standard&type=Map`);
-
-      assert.equal(second.headers.get('x-cache'), 'HIT');
-      assert.deepEqual(second.body, first.body);
-      assert.equal(upstream.count, 1);
-    } finally {
-      await app.close();
-    }
-  });
-
   it('refetches once the expiration interval has elapsed', async () => {
     const app = await startApp({
       cache: { expirationSec: 1 },
@@ -61,19 +42,25 @@ describe('cache behavior over HTTP', () => {
     });
 
     try {
-      const first = await app.get(`${stashPath}?league=Standard&type=Map`);
+      const first = await app.get(
+        `${stashOverviewPath}?league=Standard&type=Map`
+      );
 
       assert.equal(first.headers.get('x-cache'), 'MISS');
       assert.equal(upstream.count, 1);
 
-      const cachedHit = await app.get(`${stashPath}?league=Standard&type=Map`);
+      const cachedHit = await app.get(
+        `${stashOverviewPath}?league=Standard&type=Map`
+      );
 
       assert.equal(cachedHit.headers.get('x-cache'), 'HIT');
       assert.equal(upstream.count, 1);
 
       await delay(1100);
 
-      const expired = await app.get(`${stashPath}?league=Standard&type=Map`);
+      const expired = await app.get(
+        `${stashOverviewPath}?league=Standard&type=Map`
+      );
 
       assert.equal(expired.headers.get('x-cache'), 'MISS');
       assert.equal(upstream.count, 2);
@@ -87,10 +74,10 @@ describe('cache behavior over HTTP', () => {
 
     try {
       const requests = [
-        `${stashPath}?league=Standard&type=Map`,
-        `${stashPath}?league=Hardcore&type=Map`,
-        `${stashPath}?league=Standard&type=Beast`,
-        `${exchangePath}?league=Standard&type=Currency`
+        `${stashOverviewPath}?league=Standard&type=Map`,
+        `${stashOverviewPath}?league=Hardcore&type=Map`,
+        `${stashOverviewPath}?league=Standard&type=Beast`,
+        `${exchangeOverviewPath}?league=Standard&type=Currency`
       ];
 
       for (const request of requests) {
@@ -107,39 +94,10 @@ describe('cache behavior over HTTP', () => {
         const res = await app.get(request);
 
         assert.equal(res.headers.get('x-cache'), 'HIT', request);
+        assert.deepEqual(res.body, [{ ok: true }], request);
       }
 
       assert.equal(upstream.count, requests.length);
-    } finally {
-      await app.close();
-    }
-  });
-
-  it('collapses concurrent misses into a single upstream call', async () => {
-    const app = await startApp({ ninja: { baseUrl: upstream.baseUrl } });
-    const release = upstream.hold();
-
-    try {
-      const pending = Array.from({ length: 5 }, () =>
-        app.get(`${stashPath}?league=Standard&type=Map`)
-      );
-
-      // the upstream has the first request and is holding it, so the entry is
-      // in flight; the short grace lets the rest reach the handler too
-      await upstream.waitFor(1);
-      await delay(200);
-      release();
-
-      const responses = await Promise.all(pending);
-
-      assert.equal(upstream.count, 1);
-
-      for (const res of responses) {
-        assert.equal(res.status, 200);
-        assert.deepEqual(res.body, [{ ok: true }]);
-        // followers awaiting someone else's fetch report a miss as well
-        assert.equal(res.headers.get('x-cache'), 'MISS');
-      }
     } finally {
       await app.close();
     }

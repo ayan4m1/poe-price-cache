@@ -14,14 +14,14 @@ import {
   createCache,
   createLimiters,
   createNinjaClient,
+  exchangeOverviewPath,
+  stashCurrencyPath,
+  stashOverviewPath,
   UpstreamError
 } from './utils.ts';
 import { getLogger } from './logging.ts';
 
 const log = getLogger('app');
-const stashOverviewPath = '/economy/stash/current/item/overview';
-const exchangeOverviewPath = '/economy/exchange/current/overview';
-const stashCurrencyPath = '/economy/stash/current/currency/overview';
 const leaguePattern = /^[A-Za-z0-9 ._-]{1,32}$/;
 
 /**
@@ -88,14 +88,15 @@ export function createApp(config: AppConfig = loadConfig()): Express {
   });
 
   /**
-   * Both overview routes take the same league/type pair and differ only in which
-   * types the upstream accepts, so they share one handler.
+   * All three overview routes take the same league/type pair and differ only in
+   * which types the upstream accepts, so they share one handler.
    */
   function overview(path: string, types: readonly string[]) {
     return async (req: Request, res: Response) => {
       const { league, type } = req.query;
 
-      // validating both parameters keeps the cache key space bounded
+      // validation constrains the shape of a cache key - how many distinct keys
+      // can exist is bounded separately by the cache's maxEntries
       if (typeof league !== 'string' || !leaguePattern.test(league)) {
         res
           .status(400)
@@ -138,12 +139,12 @@ export function createApp(config: AppConfig = loadConfig()): Express {
       return;
     }
 
+    // the full error, including any resolved upstream path, stays in the log
+    log.error(error);
+
     if (error instanceof UpstreamError) {
-      // the resolved upstream path stays in the log, never in the response
-      log.error(error);
       res.status(error.status).json({ error: error.publicMessage });
     } else {
-      log.error(error);
       res.status(500).json({ error: 'Internal server error' });
     }
   });

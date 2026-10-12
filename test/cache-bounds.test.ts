@@ -16,9 +16,8 @@ mock.module('../src/logging.ts', {
 });
 
 const { startApp } = await import('./helpers/app.ts');
-const { defaultCacheMaxEntries, createCache } = await import('../src/utils.ts');
-
-const stashPath = '/economy/stash/current/item/overview';
+const { defaultCacheMaxEntries, createCache, stashOverviewPath } =
+  await import('../src/utils.ts');
 
 /** Resolves to `key`, and records that the fetcher actually ran. */
 function fetcherFor(key: string, calls: string[]) {
@@ -123,28 +122,30 @@ describe('cache entry bound', () => {
       }
     });
 
-    it('falls back to the default bound when the bound is unusable', async () => {
-      warn.mock.resetCalls();
-      const cache = createCache(900, NaN);
-      const calls: string[] = [];
+    for (const maxEntries of [NaN, 0, -1, Infinity]) {
+      it(`falls back to the default bound when the bound is ${maxEntries}`, async () => {
+        warn.mock.resetCalls();
+        const cache = createCache(900, maxEntries);
+        const calls: string[] = [];
 
-      try {
-        for (const key of ['a', 'b']) {
-          await cache.cached(key, fetcherFor(key, calls));
+        try {
+          for (const key of ['a', 'b']) {
+            await cache.cached(key, fetcherFor(key, calls));
+          }
+
+          // an unusable bound must not silently disable caching outright, nor
+          // leave the store unbounded
+          assert.equal(cache.size(), 2);
+          assert.equal(warn.mock.callCount(), 1);
+          assert.match(
+            String(warn.mock.calls[0]?.arguments[0]),
+            new RegExp(`falling back to ${defaultCacheMaxEntries}`)
+          );
+        } finally {
+          cache.close();
         }
-
-        // a zero or NaN bound must not silently disable caching outright, nor
-        // leave the store unbounded
-        assert.equal(cache.size(), 2);
-        assert.equal(warn.mock.callCount(), 1);
-        assert.match(
-          String(warn.mock.calls[0]?.arguments[0]),
-          new RegExp(`falling back to ${defaultCacheMaxEntries}`)
-        );
-      } finally {
-        cache.close();
-      }
-    });
+      });
+    }
   });
 
   describe('over HTTP', () => {
@@ -166,7 +167,7 @@ describe('cache entry bound', () => {
 
     it('bounds the store however many distinct leagues are requested', async () => {
       const get = (league: string) =>
-        app.get(`${stashPath}?league=${league}&type=Map`);
+        app.get(`${stashOverviewPath}?league=${league}&type=Map`);
 
       // every one of these passes the league pattern, so validation alone puts
       // no ceiling on the number of keys a caller can mint

@@ -18,8 +18,9 @@ mock.module('../src/logging.ts', {
 });
 
 const { startApp } = await import('./helpers/app.ts');
+const { stashOverviewPath } = await import('../src/utils.ts');
 
-const path = '/economy/stash/current/item/overview?league=Standard&type=Map';
+const path = `${stashOverviewPath}?league=Standard&type=Map`;
 
 describe('upstream failures', () => {
   let upstream: FakeUpstream;
@@ -134,7 +135,8 @@ describe('upstream failures', () => {
 
     assert.equal(res.status, 500);
     assert.deepEqual(res.body, { error: 'Internal server error' });
-    // a parse failure is not an UpstreamError, so it is logged
+    // a parse failure is not an UpstreamError, so it becomes a generic 500 -
+    // and like every handled error it is still logged
     assert.equal(errors.mock.callCount(), 1);
   });
 

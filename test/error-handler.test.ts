@@ -6,7 +6,7 @@ import type { Response } from 'express';
 
 import type { TestApp } from './helpers/app.ts';
 
-// the generic branch logs the error; keep the run quiet and assert on it
+// every handled error is logged; keep the run quiet and assert on it
 const error = mock.fn<(error: unknown) => void>();
 
 // app.ts takes its logger when it is first loaded, so the mock has to be in
@@ -54,11 +54,8 @@ describe('the error handler', () => {
     assert.equal(error.mock.callCount(), 0);
   });
 
-  it('answers a healthy request normally', async () => {
-    const res = await app.get('/health');
-
-    assert.equal(res.status, 200);
-    assert.deepEqual(res.body, { status: 'ok' });
+  it('logs nothing for a healthy request', async () => {
+    assert.equal((await app.get('/health')).status, 200);
     assert.equal(error.mock.callCount(), 0);
   });
 });

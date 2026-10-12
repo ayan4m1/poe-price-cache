@@ -1,7 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-const { getLogger } = await import('../src/logging.ts');
+const { getLogger, setLogLevel } = await import('../src/logging.ts');
 
 describe('getLogger', () => {
   test('hands back the same logger for the same category', () => {
@@ -25,5 +25,20 @@ describe('getLogger', () => {
     logger.error('something happened');
 
     assert.deepEqual(lines, ['[error][labelled] something happened']);
+  });
+
+  test('applies setLogLevel to existing and future loggers', () => {
+    const existing = getLogger('before-level');
+
+    try {
+      setLogLevel('warn');
+
+      assert.equal(existing.level, 'warn');
+      assert.equal(getLogger('after-level').level, 'warn');
+    } finally {
+      setLogLevel('info');
+    }
+
+    assert.equal(existing.level, 'info');
   });
 });

@@ -4,8 +4,8 @@ import { createRequire } from 'node:module';
 import type {
   CacheEntry,
   CacheResult,
-  ListenConfig,
-  NinjaConfig
+  NinjaConfig,
+  RateLimitConfig
 } from './types.ts';
 import { getLogger } from './logging.ts';
 
@@ -24,6 +24,11 @@ function packageVersion(): string {
 
 const log = getLogger('utils');
 const userAgent = `poe-price-cache/${packageVersion()} (+https://github.com/ayan4m1/poe-price-cache)`;
+
+/** Route paths, shared by the router in `createApp` and the tests. */
+export const stashOverviewPath = '/economy/stash/current/item/overview';
+export const stashCurrencyPath = '/economy/stash/current/currency/overview';
+export const exchangeOverviewPath = '/economy/exchange/current/overview';
 
 /** Fallback bound on cached entries, shared by `loadConfig` and `createCache`. */
 export const defaultCacheMaxEntries = 1000;
@@ -177,17 +182,17 @@ export function createCache(
 }
 
 /**
- * Per-IP rate limiter. The reservoir refills `limit` tokens every `windowMs`,
- * and `highWater: 0` + OVERFLOW means anything that cannot run immediately is
- * dropped (rejecting with a BottleneckError) instead of being queued.
+ * Per-IP rate limiter. The reservoir refills `limit` tokens every `windowMs`
+ * (rounded up to a multiple of 250ms), and `highWater: 0` + OVERFLOW means
+ * anything that cannot run immediately is dropped (rejecting with a
+ * BottleneckError) instead of being queued.
  */
-export function createLimiters(
-  config: ListenConfig['rateLimiter']
-): Bottleneck.Group {
+export function createLimiters(config: RateLimitConfig): Bottleneck.Group {
   return new Bottleneck.Group({
     reservoir: config.limit,
     reservoirRefreshAmount: config.limit,
-    // Bottleneck requires this to be a multiple of 250ms
+    // Bottleneck only checks for a refresh on its 250ms heartbeat, so a window
+    // that is not a multiple of that would be rounded up anyway
     reservoirRefreshInterval: Math.max(
       250,
       Math.ceil(config.windowMs / 250) * 250

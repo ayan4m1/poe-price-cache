@@ -1,24 +1,26 @@
 import { Container, type Logger, format, transports } from 'winston';
 
 const { Console } = transports;
-const { combine, label, prettyPrint, printf } = format;
+const { combine, label, printf } = format;
 
-// winston's Container is already a cache keyed by category - add() is what
-// registers one and get() returns whatever is registered, creating it only the
-// first time. a Map alongside it would be a second copy of the same bookkeeping
+// winston's Container is already a cache keyed by category - add() registers
+// a logger and get() returns whatever is registered
 const container = new Container();
+
+// loggers are created as modules load, before configuration has been read, so
+// they start at this level and setLogLevel() adjusts them afterwards
+let level = 'info';
 
 export const getLogger = (category: string): Logger => {
   if (!container.has(category)) {
     container.add(category, {
+      level,
       transports: [
         new Console({
-          level: 'info',
           format: combine(
             label({
               label: category
             }),
-            prettyPrint(),
             printf((data) => `[${data.level}][${data.label}] ${data.message}`)
           )
         })
@@ -27,4 +29,13 @@ export const getLogger = (category: string): Logger => {
   }
 
   return container.get(category);
+};
+
+/** Applies `next` to every logger, both existing and yet to be created. */
+export const setLogLevel = (next: string): void => {
+  level = next;
+
+  for (const logger of container.loggers.values()) {
+    logger.level = next;
+  }
 };

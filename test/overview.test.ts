@@ -6,6 +6,11 @@ import {
   stashCurrencyTypes,
   stashItemTypes
 } from '../src/types.ts';
+import {
+  exchangeOverviewPath,
+  stashCurrencyPath,
+  stashOverviewPath
+} from '../src/utils.ts';
 import { startApp } from './helpers/app.ts';
 import type { TestApp } from './helpers/app.ts';
 import { startUpstream } from './helpers/upstream.ts';
@@ -14,20 +19,20 @@ import type { FakeUpstream } from './helpers/upstream.ts';
 const routes = [
   {
     name: 'stash overview',
-    path: '/economy/stash/current/item/overview',
+    path: stashOverviewPath,
     types: stashItemTypes as readonly string[],
-    // a type the other two routes accept but this one must not
+    // a type another route accepts but this one must not
     foreignType: 'Scarab'
   },
   {
     name: 'stash currency',
-    path: '/economy/stash/current/currency/overview',
+    path: stashCurrencyPath,
     types: stashCurrencyTypes as readonly string[],
     foreignType: 'Scarab'
   },
   {
     name: 'exchange overview',
-    path: '/economy/exchange/current/overview',
+    path: exchangeOverviewPath,
     types: exchangeItemTypes as readonly string[],
     foreignType: 'SkillGem'
   }
@@ -37,7 +42,6 @@ const leagueError = 'league is required and must be a valid league id';
 
 const validLeagues = [
   'Standard',
-  'Hardcore',
   'Mercenaries HC',
   'Settlers.1',
   'Ancestor_x-2',

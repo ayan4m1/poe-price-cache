@@ -7,6 +7,7 @@ import { loadConfig } from '../src/config.ts';
 const managedKeys = [
   'POE_CACHE_EXPIRATION_SEC',
   'POE_CACHE_MAX_ENTRIES',
+  'POE_LOG_LEVEL',
   'POE_WEB_HOST',
   'POE_WEB_PORT',
   'POE_WEB_CORS_DOMAIN',
@@ -127,6 +128,7 @@ describe('loadConfig', () => {
     const config = loadConfig({
       POE_CACHE_EXPIRATION_SEC: '60',
       POE_CACHE_MAX_ENTRIES: '25',
+      POE_LOG_LEVEL: 'debug',
       POE_WEB_HOST: '127.0.0.1',
       POE_WEB_PORT: '8080',
       POE_WEB_CORS_DOMAIN: 'https://example.com',
@@ -143,7 +145,7 @@ describe('loadConfig', () => {
         maxEntries: 25
       },
       log: {
-        level: 'info'
+        level: 'debug'
       },
       listen: {
         host: '127.0.0.1',
@@ -160,6 +162,13 @@ describe('loadConfig', () => {
         timeoutMs: 1500
       }
     });
+  });
+
+  it('parses a non-numeric POE_CACHE_EXPIRATION_SEC as NaN', () => {
+    const config = loadConfig({ POE_CACHE_EXPIRATION_SEC: 'abc' });
+
+    // createCache treats NaN as "caching disabled" - see cache-disabled.test.ts
+    assert.ok(Number.isNaN(config.cache.expirationSec));
   });
 
   it('only trusts the proxy for the string "true"', () => {

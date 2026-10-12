@@ -4,7 +4,8 @@ import { setTimeout as delay } from 'node:timers/promises';
 
 import { startUpstream } from './helpers/upstream.ts';
 
-// every construction warns; keep the run quiet and assert on the calls
+// every construction in this file warns; keep the run quiet and assert on the
+// calls
 const warn = mock.fn<(message: string) => void>();
 
 // utils.ts takes its logger when it is first loaded, so the mock has to be in
@@ -15,11 +16,8 @@ mock.module('../src/logging.ts', {
   }
 });
 
-const { loadConfig } = await import('../src/config.ts');
-const { createCache } = await import('../src/utils.ts');
+const { createCache, stashOverviewPath } = await import('../src/utils.ts');
 const { startApp } = await import('./helpers/app.ts');
-
-const stashPath = '/economy/stash/current/item/overview';
 
 describe('an unusable cache expiration disables caching', () => {
   beforeEach(() => {
@@ -28,12 +26,6 @@ describe('an unusable cache expiration disables caching', () => {
 
   afterEach(() => {
     mock.restoreAll();
-  });
-
-  it('parses a non-numeric POE_CACHE_EXPIRATION_SEC as NaN', () => {
-    const config = loadConfig({ POE_CACHE_EXPIRATION_SEC: 'abc' });
-
-    assert.ok(Number.isNaN(config.cache.expirationSec));
   });
 
   for (const expirationSec of [NaN, 0, -1, Infinity]) {
@@ -91,7 +83,9 @@ describe('an unusable cache expiration disables caching', () => {
 
     try {
       for (let attempt = 0; attempt < 2; attempt++) {
-        const res = await app.get(`${stashPath}?league=Standard&type=Map`);
+        const res = await app.get(
+          `${stashOverviewPath}?league=Standard&type=Map`
+        );
 
         assert.equal(res.status, 200);
         assert.equal(res.headers.get('x-cache'), 'MISS');
@@ -114,7 +108,7 @@ describe('an unusable cache expiration disables caching', () => {
 
     try {
       const pending = Array.from({ length: 5 }, () =>
-        app.get(`${stashPath}?league=Standard&type=Map`)
+        app.get(`${stashOverviewPath}?league=Standard&type=Map`)
       );
 
       // the upstream has the first request and is holding it, so the entry is
@@ -129,6 +123,8 @@ describe('an unusable cache expiration disables caching', () => {
 
       for (const res of responses) {
         assert.equal(res.status, 200);
+        assert.deepEqual(res.body, [{ ok: true }]);
+        // followers awaiting someone else's fetch report a miss as well
         assert.equal(res.headers.get('x-cache'), 'MISS');
       }
     } finally {

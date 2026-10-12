@@ -9,8 +9,8 @@ import type { TestApp } from './helpers/app.ts';
 import { startUpstream } from './helpers/upstream.ts';
 import type { FakeUpstream } from './helpers/upstream.ts';
 import type { RateLimitConfig } from '../src/types.ts';
+import { stashOverviewPath } from '../src/utils.ts';
 
-const stashPath = '/economy/stash/current/item/overview';
 const windowMs = 1000;
 
 describe('per-IP rate limiting', () => {
@@ -44,13 +44,19 @@ describe('per-IP rate limiting', () => {
     try {
       upstream.requests.length = 0;
 
-      const first = await app.get(`${stashPath}?league=Standard&type=Map`);
-      const second = await app.get(`${stashPath}?league=Hardcore&type=Map`);
+      const first = await app.get(
+        `${stashOverviewPath}?league=Standard&type=Map`
+      );
+      const second = await app.get(
+        `${stashOverviewPath}?league=Hardcore&type=Map`
+      );
 
       assert.equal(first.status, 200);
       assert.equal(second.status, 200);
 
-      const third = await app.get(`${stashPath}?league=Standard&type=Beast`);
+      const third = await app.get(
+        `${stashOverviewPath}?league=Standard&type=Beast`
+      );
 
       assert.equal(third.status, 429);
       assert.deepEqual(third.body, { error: 'Too many requests' });
@@ -69,7 +75,7 @@ describe('per-IP rate limiting', () => {
     try {
       assert.equal((await app.get('/economy/leagues')).status, 200);
       assert.equal(
-        (await app.get(`${stashPath}?league=Standard&type=Map`)).status,
+        (await app.get(`${stashOverviewPath}?league=Standard&type=Map`)).status,
         429
       );
 
@@ -89,11 +95,11 @@ describe('per-IP rate limiting', () => {
 
     try {
       assert.equal(
-        (await app.get(`${stashPath}?league=Standard&type=Map`)).status,
+        (await app.get(`${stashOverviewPath}?league=Standard&type=Map`)).status,
         200
       );
       assert.equal(
-        (await app.get(`${stashPath}?league=Standard&type=Map`)).status,
+        (await app.get(`${stashOverviewPath}?league=Standard&type=Map`)).status,
         429
       );
 
@@ -101,7 +107,7 @@ describe('per-IP rate limiting', () => {
       await delay(windowMs * 2);
 
       assert.equal(
-        (await app.get(`${stashPath}?league=Standard&type=Map`)).status,
+        (await app.get(`${stashOverviewPath}?league=Standard&type=Map`)).status,
         200
       );
     } finally {
@@ -115,7 +121,7 @@ describe('per-IP rate limiting', () => {
       ninja: { baseUrl: upstream.baseUrl }
     });
     const request = (ip: string) =>
-      app.get(`${stashPath}?league=Standard&type=Map`, {
+      app.get(`${stashOverviewPath}?league=Standard&type=Map`, {
         headers: { 'x-forwarded-for': ip }
       });
 
@@ -140,11 +146,11 @@ describe('per-IP rate limiting', () => {
 
     try {
       assert.equal(
-        (await app.get(`${stashPath}?league=Standard&type=Map`)).status,
+        (await app.get(`${stashOverviewPath}?league=Standard&type=Map`)).status,
         200
       );
       assert.equal(
-        (await app.get(`${stashPath}?league=Standard&type=Map`)).status,
+        (await app.get(`${stashOverviewPath}?league=Standard&type=Map`)).status,
         429
       );
     } finally {
@@ -159,7 +165,8 @@ describe('per-IP rate limiting', () => {
     try {
       // a validation failure spends a token
       assert.equal(
-        (await app.get(`${stashPath}?league=Standard&type=Bogus`)).status,
+        (await app.get(`${stashOverviewPath}?league=Standard&type=Bogus`))
+          .status,
         400
       );
       // so the next request is throttled even though it is a 404 route
@@ -176,11 +183,13 @@ describe('per-IP rate limiting', () => {
       upstream.requests.length = 0;
 
       assert.equal(
-        (await app.get(`${stashPath}?league=Mercenaries&type=Map`)).status,
+        (await app.get(`${stashOverviewPath}?league=Mercenaries&type=Map`))
+          .status,
         200
       );
       assert.equal(
-        (await app.get(`${stashPath}?league=Mercenaries HC&type=Map`)).status,
+        (await app.get(`${stashOverviewPath}?league=Mercenaries HC&type=Map`))
+          .status,
         429
       );
 
